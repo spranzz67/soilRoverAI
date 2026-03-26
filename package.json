@@ -1,0 +1,14 @@
+{
+  "name": "agroai-serial-bridge",
+  "version": "1.0.0",
+  "description": "Bridge server connecting ESP32 serial data to the AgroAI Insights crop recommendation UI",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "start:blynk": "node -e \"process.env.DATA_SOURCE='blynk'; require('./server.js')\""
+  },
+  "dependencies": {
+    "serialport": "^12.0.0",
+    "ws": "^8.16.0"
+  }
+}
