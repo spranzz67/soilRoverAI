@@ -1,6 +1,8 @@
 # SoilRover AI: Soil Quality Surveying Rover with AI Crop Recommendation
 
-![SoilRover AI Dashboard](ui_screenshot_1774394683443.webp)
+| Dashboard Interface | Physical Hardware |
+| :---: | :---: |
+| ![Dashboard](ui_screenshot_1774394683443.webp) | ![Physical Rover](rover_model.png) |
 
 SoilRover AI is a comprehensive solution designed to empower farmers and agricultural enthusiasts with real-time soil data and intelligent crop recommendations. The system uses an ESP32-based rover equipped with sensors to collect soil parameters and a web-based dashboard for visualization and AI-driven analysis.
 
