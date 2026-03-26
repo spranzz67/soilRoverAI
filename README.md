@@ -65,3 +65,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🙏 Acknowledgments
 - Inspired by modern agricultural tech trends.
 - Powered by Google DeepMind Antigravity AI.
+- Vibecoded and Designed by Pranav S.
