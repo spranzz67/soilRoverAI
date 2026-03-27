@@ -65,7 +65,7 @@ wss.on('connection', (ws) => {
     console.log('🌐 Browser client connected');
 
     // Send the latest data immediately on connect
-    if (latestData.temperature !== null) {
+    if (latestData.timestamp !== null) {
         ws.send(JSON.stringify({ type: 'sensor_data', ...latestData }));
     }
 
@@ -74,6 +74,23 @@ wss.on('connection', (ws) => {
         connected: sourceConnected,
         source: DATA_SOURCE,
     }));
+
+    // Listen for commands from the UI
+    ws.on('message', (message) => {
+        try {
+            const msg = JSON.parse(message);
+            if (msg.type === 'command' && msg.command) {
+                console.log(`📥 Received command from UI: ${msg.command}`);
+                if (port && port.isOpen) {
+                    port.write(msg.command + '\n');
+                } else {
+                    console.log('⚠️  Cannot send command, serial port is not open.');
+                }
+            }
+        } catch (e) {
+            console.error('Error parsing WebSocket message:', e);
+        }
+    });
 
     ws.on('close', () => {
         console.log('🌐 Browser client disconnected');
@@ -153,13 +170,14 @@ async function pollBlynk() {
 
         // Only broadcast if we got at least one valid value
         if (temperature !== null || moisture !== null || N !== null || P !== null || K !== null || ph !== null) {
-            latestData = {
-                temperature,
-                moisture,
-                N, P, K, ph,
-                timestamp: Date.now(),
-            };
-            console.log(`☁️  Blynk → Temp: ${latestData.temperature}°C  |  Moisture: ${latestData.moisture ?? 'N/A'}% | NPK: ${N||'-'}/${P||'-'}/${K||'-'} | pH: ${ph||'-'}`);
+            if (temperature !== null && !isNaN(temperature)) latestData.temperature = temperature;
+            if (moisture !== null && !isNaN(moisture)) latestData.moisture = moisture;
+            if (N !== null && !isNaN(N)) latestData.N = N;
+            if (P !== null && !isNaN(P)) latestData.P = P;
+            if (K !== null && !isNaN(K)) latestData.K = K;
+            if (ph !== null && !isNaN(ph)) latestData.ph = ph;
+            latestData.timestamp = Date.now();
+            console.log(`☁️  Blynk → Temp: ${latestData.temperature}°C  |  Moisture: ${latestData.moisture ?? 'N/A'}% | NPK: ${latestData.N||'-'}/${latestData.P||'-'}/${latestData.K||'-'} | pH: ${latestData.ph||'-'}`);
             broadcast({ type: 'sensor_data', ...latestData });
         }
     } catch (err) {
@@ -238,7 +256,7 @@ function connectSerial() {
         let K = null;
         let ph = null;
 
-        // Try JSON format first
+        // Try Try JSON format first
         if (trimmed.startsWith('{')) {
             try {
                 const json = JSON.parse(trimmed);
@@ -253,8 +271,18 @@ function connectSerial() {
             }
         }
 
+        // Try to parse the specific format from the new servo sketch
+        // Format: Moisture : 45%
+        if (temperature === null && moisture === null) {
+            const moistMatchSpecific = trimmed.match(/Moisture\s*:\s*([-\d.]+)\s*%/i);
+            if (moistMatchSpecific) {
+                 moisture = parseFloat(moistMatchSpecific[1]);
+                 // If we have other sensors in the future in this block, parse them here
+            }
+        }
+
         // Try key:value format  →  TEMP:25.3,MOISTURE:47,N:120,PH:6.5
-        if (temperature === null || moisture === null) {
+        if (temperature === null && moisture === null) {
             const tempMatch = trimmed.match(/(?:TEMP|T)\s*:\s*([-\d.]+)/i);
             const moistMatch = trimmed.match(/(?:MOISTURE|MOIST|M)\s*:\s*([-\d.]+)/i);
             const nMatch = trimmed.match(/(?:NITROGEN|N)\s*:\s*([-\d.]+)/i);
@@ -284,16 +312,14 @@ function connectSerial() {
 
         // Only broadcast if we got at least one valid value
         if (temperature !== null || moisture !== null || N !== null || P !== null || K !== null || ph !== null) {
-            latestData = {
-                temperature: isNaN(temperature) ? null : temperature,
-                moisture: isNaN(moisture) ? null : moisture,
-                N: isNaN(N) ? null : N,
-                P: isNaN(P) ? null : P,
-                K: isNaN(K) ? null : K,
-                ph: isNaN(ph) ? null : ph,
-                timestamp: Date.now(),
-            };
-            console.log(`📊 Temp: ${latestData.temperature}°C | Moist: ${latestData.moisture}% | NPK: ${N||'-'}/${P||'-'}/${K||'-'} | pH: ${ph||'-'}`);
+            if (temperature !== null && !isNaN(temperature)) latestData.temperature = temperature;
+            if (moisture !== null && !isNaN(moisture)) latestData.moisture = moisture;
+            if (N !== null && !isNaN(N)) latestData.N = N;
+            if (P !== null && !isNaN(P)) latestData.P = P;
+            if (K !== null && !isNaN(K)) latestData.K = K;
+            if (ph !== null && !isNaN(ph)) latestData.ph = ph;
+            latestData.timestamp = Date.now();
+            console.log(`📊 Temp: ${latestData.temperature}°C | Moist: ${latestData.moisture}% | NPK: ${latestData.N||'-'}/${latestData.P||'-'}/${latestData.K||'-'} | pH: ${latestData.ph||'-'}`);
             broadcast({ type: 'sensor_data', ...latestData });
         }
     });

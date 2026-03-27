@@ -8,6 +8,8 @@
     "start:blynk": "node -e \"process.env.DATA_SOURCE='blynk'; require('./server.js')\""
   },
   "dependencies": {
+    "docx": "^9.6.1",
+    "mammoth": "^1.12.0",
     "serialport": "^12.0.0",
     "ws": "^8.16.0"
   }
