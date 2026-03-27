@@ -20,7 +20,7 @@ SoilRover AI is a comprehensive solution designed to empower farmers and agricul
 - **Frontend**: HTML5, CSS3 (Vanilla), JavaScript (ES6+), Google Fonts.
 - **Backend**: Node.js, WebSocket (WS), SerialPort.
 - **Edge ML**: Web Workers for local model execution.
-- **Hardware**: ESP32, Soil Sensors (Temperature, Moisture, NPK, pH).
+- **Hardware**: ESP32, Soil Sensors (Temperature, Moisture).
 
 ## 📂 Project Structure
 
